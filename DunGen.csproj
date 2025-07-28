@@ -1,0 +1,57 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup Label="Compilation Options">
+
+	<!-- Base Options -->
+	<TargetFramework>net9.0-windows10.0.26100.0</TargetFramework>
+	<PlatformTarget>x64</PlatformTarget>
+	<PublishAot>true</PublishAot>
+	<OutputType>Exe</OutputType>
+
+	<!-- Optimization Options -->
+	<IlcFoldIdenticalMethodBodies>true</IlcFoldIdenticalMethodBodies>
+	<IlcOptimizationPreference>Speed</IlcOptimizationPreference>
+	<InvariantGlobalization>true</InvariantGlobalization>
+	<StackTraceSupport>false</StackTraceSupport>
+
+	<!-- Analysis Options -->
+	<TreatWarningsAsErrors>True</TreatWarningsAsErrors>
+	<AnalysisLevel>preview-all</AnalysisLevel>
+	<NoWarn>1701;1702;NU1903;NU1902</NoWarn>
+	<IsAotCompatible>true</IsAotCompatible>
+	<WarningLevel>9999</WarningLevel>
+
+	<!-- Language Options -->
+	<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+	<ImplicitUsings>enable</ImplicitUsings>
+	<RootNamespace>DunGen</RootNamespace>
+	<LangVersion>preview</LangVersion>
+	<Nullable>enable</Nullable>
+
+	<!-- Output Options -->
+	<GenerateRuntimeConfigurationFiles>false</GenerateRuntimeConfigurationFiles>
+	<GenerateDocumentationFile>True</GenerateDocumentationFile>
+	<ServerGarbageCollection>true</ServerGarbageCollection>
+	<Deterministic>False</Deterministic>
+	<SelfContained>true</SelfContained>
+	<Trimming>full</Trimming>
+
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)'=='Debug'">
+	<DebugType>full</DebugType>
+	<Optimize>False</Optimize>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)'=='Release'">
+	<DebugType>none</DebugType>
+	<Optimize>True</Optimize>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="SharpKit">
+      <HintPath>SharpKit.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>
