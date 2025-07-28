@@ -1,4 +1,5 @@
 ﻿using static DunGen.Rooms.RoomFlags;
+using static DunGen.Rooms.Direction;
 using static DunGen.MapSize;
 using DunGen.Rooms;
 
@@ -18,7 +19,7 @@ internal class Map
 		get
 		{
 			int result = 0;
-			foreach (Room room in Rooms) if (room.Flags.HasFlag(Standard)) result++;
+			foreach (Room room in Rooms) if (room.HasFlags(Standard)) result++;
 			return result;
 		}
 	}
@@ -95,46 +96,46 @@ internal class Map
 				{
 					Room room = Rooms[x, y];
 
-					if (room.Flags == NoRoom) continue;
+					if (room.IsEmpty) continue;
 
-					if (room.HasFlags(NorthDoor) && !room.NorthConnection!.HasFlags(SouthDoor))
+					if (room.HasFlags(NorthDoor) && !room.GetNeighbour(North).HasFlags(SouthDoor))
 					{
-						if (Dice.D2 && !room.NorthConnection.IsEmpty)
+						if (Dice.D2 && !room.GetNeighbour(North).IsEmpty)
 						{
-							room.NorthConnection.AddFlags(SouthDoor);
+							room.GetNeighbour(North).AddFlags(SouthDoor);
 						}
 						else
 						{
 							room.RemoveFlags(NorthDoor);
 						}
 					}
-					if (room.HasFlags( EastDoor) && !room. EastConnection!.HasFlags( WestDoor))
+					if (room.HasFlags( EastDoor) && !room. GetNeighbour(East).HasFlags( WestDoor))
 					{
-						if (Dice.D2 && !room.EastConnection.IsEmpty)
+						if (Dice.D2 && !room.GetNeighbour(East).IsEmpty)
 						{
-							room.EastConnection.AddFlags(WestDoor);
+							room.GetNeighbour(East).AddFlags(WestDoor);
 						}
 						else
 						{
 							room.RemoveFlags(EastDoor);
 						}
 					}
-					if (room.HasFlags(SouthDoor) && !room.SouthConnection!.HasFlags(NorthDoor))
+					if (room.HasFlags(SouthDoor) && !room.GetNeighbour(South).HasFlags(NorthDoor))
 					{
-						if (Dice.D2 && !room.SouthConnection.IsEmpty)
+						if (Dice.D2 && !room.GetNeighbour(South).IsEmpty)
 						{
-							room.SouthConnection.AddFlags(NorthDoor);
+							room.GetNeighbour(South).AddFlags(NorthDoor);
 						}
 						else
 						{
 							room.RemoveFlags(SouthDoor);
 						}
 					}
-					if (room.HasFlags( WestDoor) && !room. WestConnection!.HasFlags( EastDoor))
+					if (room.HasFlags( WestDoor) && !room. GetNeighbour(West).HasFlags( EastDoor))
 					{
-						if (Dice.D2 && !room.WestConnection.IsEmpty)
+						if (Dice.D2 && !room.GetNeighbour(West).IsEmpty)
 						{
-							room.WestConnection.AddFlags(EastDoor);
+							room.GetNeighbour(West).AddFlags(EastDoor);
 						}
 						else
 						{
