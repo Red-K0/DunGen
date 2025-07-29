@@ -3,7 +3,7 @@ using static DunGen.Values.RoomFlags;
 using static DunGen.Utilities.Dice;
 using DunGen.Utilities;
 using DunGen.Values;
-namespace DunGen;
+namespace DunGen.Generation;
 
 internal class Room(Map map, int x, int y, RoomFlags flags)
 {
@@ -33,10 +33,10 @@ internal class Room(Map map, int x, int y, RoomFlags flags)
 
 		while (true)
 		{
-			Directions direction = Generation.GetRandomDirection();
+			Directions direction = DirectionUtilities.GetRandomDirection();
 
 			if (!CanConnect(direction) || HasDoor(direction)) continue;
-			if (GetNeighbour(direction).IsEmpty) GetNeighbour(direction).AddFlags((RoomFlags)Generation.GetOppositeDirection(direction));
+			if (GetNeighbour(direction).IsEmpty) GetNeighbour(direction).AddFlags((RoomFlags)DirectionUtilities.GetOppositeDirection(direction));
 			AddFlags((RoomFlags)direction);
 
 			return true;
@@ -122,7 +122,7 @@ internal class Room(Map map, int x, int y, RoomFlags flags)
 			if (HasDoor((Directions)i) && !IsConnected((Directions)i)) GetNeighbour((Directions)i).GenerateChain();
 		}
 	}
-	public void DetermineStructure() => AddFlags((D100 < (50 - (map.Count(Standard) / 2))) ? Standard : Corridor);
+	public void DetermineStructure() => AddFlags(D100 < 50 - (map.Count(Standard) / 2) ? Standard : Corridor);
 
 	#endregion
 

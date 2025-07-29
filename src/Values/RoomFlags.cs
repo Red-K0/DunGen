@@ -1,4 +1,6 @@
-﻿namespace DunGen.Values;
+﻿using DunGen.Generation;
+
+namespace DunGen.Values;
 
 /// <summary>
 /// Represents the properties and characteristics of a <see cref="Room"/>.

@@ -3,7 +3,7 @@ using static DunGen.Values.MapSize;
 using DunGen.Utilities;
 using DunGen.Values;
 
-namespace DunGen;
+namespace DunGen.Generation;
 
 internal class Map
 {
@@ -83,11 +83,11 @@ internal class Map
 					{
 						Room neighbour;
 
-						if (room.HasDoor((Directions)i) && !(neighbour = room.GetNeighbour((Directions)i)).HasDoor(Generation.GetOppositeDirection((Directions)i)))
+						if (room.HasDoor((Directions)i) && !(neighbour = room.GetNeighbour((Directions)i)).HasDoor(DirectionUtilities.GetOppositeDirection((Directions)i)))
 						{
 							if (Dice.D2 && !neighbour.IsEmpty)
 							{
-								neighbour.AddFlags((RoomFlags)Generation.GetOppositeDirection((Directions)i));
+								neighbour.AddFlags((RoomFlags)DirectionUtilities.GetOppositeDirection((Directions)i));
 							}
 							else
 							{
@@ -112,9 +112,9 @@ internal class Map
 
 		return Size switch
 		{
-			 Small => (structureCount is < 10 or > 20) || (roomCount is < 10 or > 15),
-			Medium => (structureCount is < 20 or > 30) || (roomCount is < 15 or > 20),
-			 Large => (structureCount is < 30 or > 40) || (roomCount is < 20 or > 25),
+			 Small => structureCount is < 10 or > 20 || roomCount is < 10 or > 15,
+			Medium => structureCount is < 20 or > 30 || roomCount is < 15 or > 20,
+			 Large => structureCount is < 30 or > 40 || roomCount is < 20 or > 25,
 			_ => true
 		};
 	}

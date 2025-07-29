@@ -1,4 +1,6 @@
-﻿namespace DunGen.Values;
+﻿using DunGen.Generation;
+
+namespace DunGen.Values;
 
 /// <summary>
 /// Represents the size of a <see cref="Map"/>, determining its width, height, and room count.

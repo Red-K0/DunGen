@@ -48,10 +48,4 @@
 	<Optimize>True</Optimize>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Reference Include="SharpKit">
-      <HintPath>SharpKit.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-
 </Project>

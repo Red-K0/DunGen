@@ -5,9 +5,9 @@ using DunGen.Values;
 namespace DunGen.Utilities;
 
 /// <summary>
-/// Contains various loose utiltiies for dungeon generation.
+/// Contains various loose utiltiies for working with directions.
 /// </summary>
-internal static class Generation
+internal static class DirectionUtilities
 {
 	/// <summary>
 	/// Returns a random <see cref="Directions"/> value, determined by rolling a <see cref="D4"/>.

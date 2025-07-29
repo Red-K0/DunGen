@@ -1,5 +1,5 @@
 ﻿using DunGen.Values;
-using DunGen;
+using DunGen.Generation;
 
 Console.SetWindowSize(150, 50);
 Console.SetBufferSize(150, 50);
