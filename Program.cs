@@ -1,17 +1,14 @@
-﻿using DunGen;
+﻿using DunGen.Values;
+using DunGen;
 
 Console.SetWindowSize(150, 50);
 Console.SetBufferSize(150, 50);
 Console.CursorVisible = false;
 
-while (true)
-{
-	Map map = new(MapSize.Small);
+Map map = new(MapSize.Large);
 
-	Console.Clear();
+Console.Clear();
 
-	map.Draw();
+map.Draw();
 
-	Thread.Sleep(1000);
-}
-
+Thread.Sleep(-1);

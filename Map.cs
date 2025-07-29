@@ -1,7 +1,7 @@
-﻿using static DunGen.Rooms.RoomFlags;
-using static DunGen.Rooms.Direction;
-using static DunGen.MapSize;
-using DunGen.Rooms;
+﻿using static DunGen.Values.RoomFlags;
+using static DunGen.Values.MapSize;
+using DunGen.Utilities;
+using DunGen.Values;
 
 namespace DunGen;
 
@@ -9,30 +9,11 @@ internal class Map
 {
 	#region Fields & Properties
 
-	public Room[,] Rooms = null!;
 	public readonly int Width, Height;
 	public readonly MapSize Size;
+
 	public Room? Entrance = null!;
-
-	public int RoomCount
-	{
-		get
-		{
-			int result = 0;
-			foreach (Room room in Rooms) if (room.HasFlags(Standard)) result++;
-			return result;
-		}
-	}
-
-	public int StructureCount
-	{
-		get
-		{
-			int result = 0;
-			foreach (Room room in Rooms) if (!room.IsEmpty) result++;
-			return result;
-		}
-	}
+	public Room[,] Rooms = null!;
 
 	#endregion
 
@@ -98,54 +79,26 @@ internal class Map
 
 					if (room.IsEmpty) continue;
 
-					if (room.HasFlags(NorthDoor) && !room.GetNeighbour(North).HasFlags(SouthDoor))
+					for (int i = 1; i <= 8; i <<= 1)
 					{
-						if (Dice.D2 && !room.GetNeighbour(North).IsEmpty)
+						Room neighbour;
+
+						if (room.HasDoor((Directions)i) && !(neighbour = room.GetNeighbour((Directions)i)).HasDoor(Generation.GetOppositeDirection((Directions)i)))
 						{
-							room.GetNeighbour(North).AddFlags(SouthDoor);
-						}
-						else
-						{
-							room.RemoveFlags(NorthDoor);
-						}
-					}
-					if (room.HasFlags( EastDoor) && !room. GetNeighbour(East).HasFlags( WestDoor))
-					{
-						if (Dice.D2 && !room.GetNeighbour(East).IsEmpty)
-						{
-							room.GetNeighbour(East).AddFlags(WestDoor);
-						}
-						else
-						{
-							room.RemoveFlags(EastDoor);
-						}
-					}
-					if (room.HasFlags(SouthDoor) && !room.GetNeighbour(South).HasFlags(NorthDoor))
-					{
-						if (Dice.D2 && !room.GetNeighbour(South).IsEmpty)
-						{
-							room.GetNeighbour(South).AddFlags(NorthDoor);
-						}
-						else
-						{
-							room.RemoveFlags(SouthDoor);
-						}
-					}
-					if (room.HasFlags( WestDoor) && !room. GetNeighbour(West).HasFlags( EastDoor))
-					{
-						if (Dice.D2 && !room.GetNeighbour(West).IsEmpty)
-						{
-							room.GetNeighbour(West).AddFlags(EastDoor);
-						}
-						else
-						{
-							room.RemoveFlags(WestDoor);
+							if (Dice.D2 && !neighbour.IsEmpty)
+							{
+								neighbour.AddFlags((RoomFlags)Generation.GetOppositeDirection((Directions)i));
+							}
+							else
+							{
+								room.RemoveFlags((RoomFlags)i);
+							}
 						}
 					}
 
 					if (room.ConnectionCount == (room.IsCorridor ? 1 : 0))
 					{
-						room.RemoveFlags((RoomFlags)int.MaxValue);
+						room.ClearFlags();
 						rescan = true;
 					}
 				}
@@ -155,11 +108,13 @@ internal class Map
 
 	private bool ValidateMap()
 	{
+		int roomCount = Count(Standard), structureCount = roomCount + Count(Corridor);
+
 		return Size switch
 		{
-			 Small => (StructureCount is < 10 or > 20) || (RoomCount is < 10 or > 15),
-			Medium => (StructureCount is < 20 or > 30) || (RoomCount is < 15 or > 20),
-			 Large => (StructureCount is < 30 or > 40) || (RoomCount is < 20 or > 25),
+			 Small => (structureCount is < 10 or > 20) || (roomCount is < 10 or > 15),
+			Medium => (structureCount is < 20 or > 30) || (roomCount is < 15 or > 20),
+			 Large => (structureCount is < 30 or > 40) || (roomCount is < 20 or > 25),
 			_ => true
 		};
 	}
@@ -203,6 +158,13 @@ internal class Map
 	#endregion
 
 	#region Helpers
+
+	public int Count(RoomFlags flag)
+	{
+		int result = 0;
+		foreach (Room room in Rooms) if (room.HasFlags(flag)) result++;
+		return result;
+	}
 
 	private Room GetRandomRoom() => Rooms[Random.Shared.Next(0, Width), Random.Shared.Next(0, Height)];
 

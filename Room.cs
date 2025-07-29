@@ -1,32 +1,21 @@
-﻿using static DunGen.Rooms.RoomFlags;
-using static DunGen.Rooms.Direction;
-using static DunGen.Dice;
-using DunGen.Rooms;
+﻿using static DunGen.Values.Directions;
+using static DunGen.Values.RoomFlags;
+using static DunGen.Utilities.Dice;
+using DunGen.Utilities;
+using DunGen.Values;
 namespace DunGen;
 
 internal class Room(Map map, int x, int y, RoomFlags flags)
 {
-	public void GenerateChain()
-	{
-		DetermineStructure();
-
-		DetermineConnections();
-
-		if (HasFlags(NorthDoor) && !IsConnected(North)) GetNeighbour(North).GenerateChain();
-		if (HasFlags( EastDoor) && !IsConnected( East)) GetNeighbour( East).GenerateChain();
-		if (HasFlags(SouthDoor) && !IsConnected(South)) GetNeighbour(South).GenerateChain();
-		if (HasFlags( WestDoor) && !IsConnected( West)) GetNeighbour( West).GenerateChain();
-	}
-	public bool CanHaveMoreConnections => (!HasFlags(NorthDoor) && CanConnect(North)) || (!HasFlags(EastDoor) && CanConnect(East)) || (!HasFlags(SouthDoor) && CanConnect(South)) || (!HasFlags(WestDoor) && CanConnect(West));
+	#region Connections
 	private int MaximumConnections
 	{
 		get
 		{
 			int result = 0;
-			if (CanConnect(North)) result++;
-			if  (CanConnect(East)) result++;
-			if (CanConnect(South)) result++;
-			if  (CanConnect(West)) result++;
+
+			for (int i = 1; i <= 8; i <<= 1) if (CanConnect((Directions)i)) result++;
+
 			return result;
 		}
 	}
@@ -40,38 +29,15 @@ internal class Room(Map map, int x, int y, RoomFlags flags)
 
 	public bool AddConnection()
 	{
-		if (!CanHaveMoreConnections) return false;
+		if (!(!HasFlags(NorthDoor) && CanConnect(North)) || (!HasFlags(EastDoor) && CanConnect(East)) || (!HasFlags(SouthDoor) && CanConnect(South)) || (!HasFlags(WestDoor) && CanConnect(West))) return false;
 
 		while (true)
 		{
-			RoomFlags newDirection = (RoomFlags)Generation.GetRandomDirection();
+			Directions direction = Generation.GetRandomDirection();
 
-			switch (newDirection)
-			{
-				case NorthDoor:
-					if (!CanConnect(North) || HasFlags(NorthDoor)) continue;
-					if (GetNeighbour(North).IsEmpty) GetNeighbour(North).AddFlags(SouthDoor);
-					AddFlags(NorthDoor);
-					break;
-
-				case EastDoor:
-					if (!CanConnect(East) || HasFlags(EastDoor)) continue;
-					if (GetNeighbour(East).IsEmpty) GetNeighbour(East).AddFlags(WestDoor);
-					AddFlags(EastDoor);
-					break;
-
-				case SouthDoor:
-					if (!CanConnect(South) || HasFlags(SouthDoor)) continue;
-					if (GetNeighbour(South).IsEmpty) GetNeighbour(South).AddFlags(NorthDoor);
-					AddFlags(SouthDoor);
-					break;
-
-				case WestDoor:
-					if (!CanConnect(West) || HasFlags(WestDoor)) continue;
-					if (GetNeighbour(West).IsEmpty) GetNeighbour(West).AddFlags(EastDoor);
-					AddFlags(WestDoor);
-					break;
-			}
+			if (!CanConnect(direction) || HasDoor(direction)) continue;
+			if (GetNeighbour(direction).IsEmpty) GetNeighbour(direction).AddFlags((RoomFlags)Generation.GetOppositeDirection(direction));
+			AddFlags((RoomFlags)direction);
 
 			return true;
 		}
@@ -81,35 +47,17 @@ internal class Room(Map map, int x, int y, RoomFlags flags)
 		int roll = D100, connectionCount;
 
 		#pragma warning disable IDE0045 // This would be unreadable
-		if (map.RoomCount < 50)
+		if (roll <= 5)
 		{
-			if (roll <= (5 - ((50 - map.RoomCount) / 10)))
-			{
-				connectionCount = IsCorridor ? 2 : 1;
-			}
-			else if (roll <= (10 + (map.RoomCount / 2)))
-			{
-				connectionCount = 3;
-			}
-			else
-			{
-				connectionCount = 2;
-			}
+			connectionCount = IsCorridor ? 2 : 1;
+		}
+		else if (roll <= 15)
+		{
+			connectionCount = 3;
 		}
 		else
 		{
-			if (roll <= 5)
-			{
-				connectionCount = IsCorridor ? 2 : 1;
-			}
-			else if (roll <= 15)
-			{
-				connectionCount = 3;
-			}
-			else
-			{
-				connectionCount = 2;
-			}
+			connectionCount = 2;
 		}
 		#pragma warning restore IDE0045
 
@@ -117,12 +65,12 @@ internal class Room(Map map, int x, int y, RoomFlags flags)
 
 		for (int i = 0; i < connectionCount; i++) AddConnection();
 	}
-	public void DetermineStructure() => AddFlags((D100 < (50 - (map.RoomCount / 2))) ? Standard : Corridor);
 
+	#endregion
 
 	#region Directional Relationships
 
-	public bool CanConnect(Direction direction) => direction switch
+	public bool CanConnect(Directions direction) => direction switch
 	{
 		North => y != 0,
 		East  => x != map.Width  - 1,
@@ -130,7 +78,7 @@ internal class Room(Map map, int x, int y, RoomFlags flags)
 		West  => x != 0,
 	};
 
-	public Room GetNeighbour(Direction direction) => direction switch
+	public Room GetNeighbour(Directions direction) => direction switch
 	{
 		North => map.Rooms[x, y - 1],
 		East  => map.Rooms[x + 1, y],
@@ -138,9 +86,9 @@ internal class Room(Map map, int x, int y, RoomFlags flags)
 		West  => map.Rooms[x - 1, y],
 	};
 
-	public bool CanCombine(Direction direction) => IsLarge && GetNeighbour(direction).IsLarge;
+	public bool CanCombine(Directions direction) => IsLarge && GetNeighbour(direction).IsLarge;
 
-	public bool IsConnected(Direction direction) => !(GetNeighbour(direction).IsEmpty && HasFlags((RoomFlags)direction));
+	public bool IsConnected(Directions direction) => !(GetNeighbour(direction).IsEmpty && HasFlags((RoomFlags)direction));
 
 	#endregion
 
@@ -149,12 +97,32 @@ internal class Room(Map map, int x, int y, RoomFlags flags)
 	public void    AddFlags(RoomFlags newFlags) => flags |= newFlags;
 	public bool    HasFlags(RoomFlags newFlags) => flags.HasFlag(newFlags);
 	public void RemoveFlags(RoomFlags newFlags) => flags &= ~newFlags;
+	public void ClearFlags() => flags = NoRoom;
+
+	public bool HasDoor(Directions direction) => HasFlags((RoomFlags)direction);
 
 	public bool IsStandardRoom => HasFlags(Standard);
 	public bool IsCorridor => HasFlags(Corridor);
 	public bool IsEmpty => !(HasFlags(Standard) || HasFlags(Corridor));
 	public bool IsEntrance => HasFlags(Entrance);
-	public bool IsLarge => HasFlags(LargeRoom);
+	public bool IsLarge => HasFlags(Hall);
+
+	#endregion
+
+	#region Generation
+
+	public void GenerateChain()
+	{
+		DetermineStructure();
+
+		DetermineConnections();
+
+		for (int i = 1; i <= 8; i <<= 1)
+		{
+			if (HasDoor((Directions)i) && !IsConnected((Directions)i)) GetNeighbour((Directions)i).GenerateChain();
+		}
+	}
+	public void DetermineStructure() => AddFlags((D100 < (50 - (map.Count(Standard) / 2))) ? Standard : Corridor);
 
 	#endregion
 
